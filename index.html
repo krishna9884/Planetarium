@@ -24,7 +24,7 @@
 
         .controls-container {
             position: absolute;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
             display: flex;
             flex-direction: column;
@@ -44,20 +44,6 @@
             background-color: #fff;
             color: #333;
             cursor: pointer;
-        }
-
-        /* Media query for mobile view */
-        @media (max-width: 768px) {
-            .controls-container {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                z-index: 9999;
-                /* Ensure the controls appear on top */
-            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -119,7 +105,6 @@
         scene.add(bgSphere);
 
         const planetProperties = {
-            // Planet properties here
             Mercury: {
                 name: 'Mercury',
                 texture: 'images/mercury_map.jpg',
@@ -168,7 +153,6 @@
                 position: new THREE.Vector3(0, 0, 0),
                 size: 3
             },
-
             Pluto: {
                 name: 'Pluto',
                 texture: 'images/pluto_map.jpg',
@@ -184,11 +168,11 @@
         };
 
         // Create a variable to hold the currently rendered planet
-        let currentPlanet;
+        let currentPlanet = null;
 
         // Create a function to render the selected planet
         function renderPlanet(planetName) {
-            // Remove the previously rendered planet from the scene if exists
+            // Remove the previously rendered planet from the scene if it exists
             if (currentPlanet) {
                 scene.remove(currentPlanet.mesh);
             }
@@ -222,6 +206,51 @@
             const selectedPlanet = planetSelect.value;
             renderPlanet(selectedPlanet);
         });
+
+        // Function to handle touch events
+        function handleTouchStart(event) {
+            const touch = event.touches[0];
+            touch.startX = touch.clientX;
+            touch.startY = touch.clientY;
+        }
+
+        function handleTouchMove(event) {
+            if (event.touches.length === 1) {
+                const touch = event.touches[0];
+                const deltaX = touch.clientX - touch.startX;
+                const deltaY = touch.clientY - touch.startY;
+
+                camera.rotation.y += deltaX * 0.01;
+                camera.rotation.x += deltaY * 0.01;
+
+                touch.startX = touch.clientX;
+                touch.startY = touch.clientY;
+            }
+        }
+
+        // Add touch event listeners to the renderer element
+        renderer.domElement.addEventListener('touchstart', handleTouchStart, false);
+        renderer.domElement.addEventListener('touchmove', handleTouchMove, false);
+
+        // Function to handle mouse wheel event
+        function onDocumentMouseWheel(event) {
+            const delta = Math.max(-1, Math.min(1, event.deltaY));
+            const zoomSpeed = 0.1;
+
+            // Update camera position based on zooming
+            camera.position.z += delta * zoomSpeed;
+
+            // Limit the minimum and maximum camera position
+            const minZoom = 5;
+            const maxZoom = 50;
+            camera.position.z = Math.max(minZoom, Math.min(maxZoom, camera.position.z));
+
+            // Update camera look-at target to keep Earth centered
+            camera.lookAt(currentPlanet.mesh.position);
+        }
+
+        // Add event listener for mouse wheel
+        document.addEventListener('wheel', onDocumentMouseWheel, false);
 
         // Variables for mouse interaction
         let isDragging = false;
@@ -288,6 +317,8 @@
 
             currentPlanet.mesh.rotation.y += 0.002;
             bgSphere.rotation.y += 0.002;
+
+            camera.lookAt(currentPlanet.mesh.position);
 
             // Render the scene with the camera
             renderer.render(scene, camera);
