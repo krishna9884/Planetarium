@@ -208,6 +208,9 @@
         });
 
         // Function to handle touch events
+
+        let isDragging = false;
+
         function handleTouchStart(event) {
             const touch = event.touches[0];
             touch.startX = touch.clientX;
@@ -220,47 +223,14 @@
                 const deltaX = touch.clientX - touch.startX;
                 const deltaY = touch.clientY - touch.startY;
 
-                camera.rotation.y += deltaX * 0.01;
-                camera.rotation.x += deltaY * 0.01;
+                const rotationSpeed = 0.01;
+                camera.rotation.y += deltaX * rotationSpeed;
+                camera.rotation.x += deltaY * rotationSpeed;
 
                 touch.startX = touch.clientX;
                 touch.startY = touch.clientY;
             }
         }
-
-        // Add touch event listeners to the renderer element
-        renderer.domElement.addEventListener('touchstart', handleTouchStart, false);
-        renderer.domElement.addEventListener('touchmove', handleTouchMove, false);
-
-        // Function to handle mouse wheel event
-        function onDocumentMouseWheel(event) {
-            const delta = Math.max(-1, Math.min(1, event.deltaY));
-            const zoomSpeed = 0.1;
-
-            // Update camera position based on zooming
-            camera.position.z += delta * zoomSpeed;
-
-            // Limit the minimum and maximum camera position
-            const minZoom = 5;
-            const maxZoom = 50;
-            camera.position.z = Math.max(minZoom, Math.min(maxZoom, camera.position.z));
-
-            // Update camera look-at target to keep Earth centered
-            camera.lookAt(currentPlanet.mesh.position);
-        }
-
-        // Add event listener for mouse wheel
-        document.addEventListener('wheel', onDocumentMouseWheel, false);
-
-        // Variables for mouse interaction
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        let rotationSpeed = 0.01;
-
-        // Mouse events for camera movement
-        renderer.domElement.addEventListener('mousedown', onMouseDown);
-        renderer.domElement.addEventListener('mousemove', onMouseMove);
-        renderer.domElement.addEventListener('mouseup', onMouseUp);
 
         function onMouseDown(event) {
             isDragging = true;
@@ -275,18 +245,15 @@
                 const deltaX = event.clientX - previousMousePosition.x;
                 const deltaY = event.clientY - previousMousePosition.y;
 
-                // Calculate the rotation angles based on mouse movement
                 const rotationSpeed = 0.01;
                 const theta = deltaX * rotationSpeed;
                 const phi = deltaY * rotationSpeed;
 
-                // Calculate the new camera position in spherical coordinates
                 const spherical = new THREE.Spherical().setFromVector3(camera.position.clone().sub(currentPlanet.mesh.position));
                 spherical.theta -= theta;
                 spherical.phi -= phi;
                 spherical.makeSafe();
 
-                // Convert spherical coordinates back to Cartesian coordinates
                 const position = new THREE.Vector3().setFromSpherical(spherical);
                 camera.position.copy(currentPlanet.mesh.position).add(position);
                 camera.lookAt(currentPlanet.mesh.position);
@@ -302,14 +269,39 @@
             isDragging = false;
         }
 
-        // Resize handling
+        function onDocumentMouseWheel(event) {
+            const delta = Math.max(-1, Math.min(1, event.deltaY));
+            const zoomSpeed = 0.1;
+
+            camera.position.z += delta * zoomSpeed;
+
+            const minZoom = 5;
+            const maxZoom = 50;
+            camera.position.z = Math.max(minZoom, Math.min(maxZoom, camera.position.z));
+
+            camera.lookAt(currentPlanet.mesh.position);
+        }
+
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        window.addEventListener('resize', onWindowResize, false);
+        // Touch events
+        renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+        renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+        // Mouse events
+        renderer.domElement.addEventListener('mousedown', onMouseDown);
+        renderer.domElement.addEventListener('mousemove', onMouseMove);
+        renderer.domElement.addEventListener('mouseup', onMouseUp);
+        renderer.domElement.addEventListener('wheel', onDocumentMouseWheel, { passive: true });
+
+        // Window resize handling
+        window.addEventListener('resize', onWindowResize, { passive: true });
+        window.addEventListener('orientationchange', onWindowResize, { passive: true });
+
 
         // Render loop
         function animate() {
