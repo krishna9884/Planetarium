@@ -113,7 +113,7 @@
         const bgGeometry = new THREE.SphereGeometry(1000, 50, 50);
         const bgMaterial = new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
-            map: new THREE.TextureLoader().load('/images/starry_bg.jpg')
+            map: new THREE.TextureLoader().load('images/starry_bg.jpg')
         });
         const bgSphere = new THREE.Mesh(bgGeometry, bgMaterial);
         scene.add(bgSphere);
@@ -122,62 +122,62 @@
             // Planet properties here
             Mercury: {
                 name: 'Mercury',
-                texture: '/images/mercury_map.jpg',
+                texture: 'images/mercury_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2
             },
             Venus: {
                 name: 'Venus',
-                texture: '/images/venus_map.jpg',
+                texture: 'images/venus_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2
             },
             Earth: {
                 name: 'Earth',
-                texture: '/images/earth_map.jpg',
+                texture: 'images/earth_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2.5
             },
             Mars: {
                 name: 'Mars',
-                texture: '/images/mars_map.jpg',
+                texture: 'images/mars_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2
             },
             Jupiter: {
                 name: 'Jupiter',
-                texture: '/images/jupiter_map.jpg',
+                texture: 'images/jupiter_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 4
             },
             Saturn: {
                 name: 'Saturn',
-                texture: '/images/saturn_map.jpg',
+                texture: 'images/saturn_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 3
             },
             Uranus: {
                 name: 'Uranus',
-                texture: '/images/uranus_map.jpg',
+                texture: 'images/uranus_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 3
             },
             Neptune: {
                 name: 'Neptune',
-                texture: '/images/neptune_map.jpg',
+                texture: 'images/neptune_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 3
             },
 
             Pluto: {
                 name: 'Pluto',
-                texture: '/images/pluto_map.jpg',
+                texture: 'images/pluto_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 1.5
             },
             Sun: {
                 name: 'Sun',
-                texture: '/images/sun_map.jpg',
+                texture: 'images/sun_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 5
             }
