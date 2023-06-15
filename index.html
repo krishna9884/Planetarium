@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            height: 100vh;
+        }
+
+        #planet-info {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .controls-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .control {
+            margin-bottom: 10px;
+        }
+
+        select,
+        button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Media query for mobile view */
+        @media (max-width: 768px) {
+            .controls-container {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                z-index: 9999;
+                /* Ensure the controls appear on top */
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+    <div id="planet-info">
+        <h1>Planet Information</h1>
+        <p>Here you can add any information or details about the selected planet.</p>
+    </div>
+
+    <div class="controls-container">
+        <div class="control">
+            <label for="planet-select">Select Planet:</label>
+            <select id="planet-select" default="Earth">
+                <option value="Mercury">Mercury</option>
+                <option value="Venus">Venus</option>
+                <option value="Earth" selected>Earth</option>
+                <option value="Mars">Mars</option>
+                <option value="Jupiter">Jupiter</option>
+                <option value="Saturn">Saturn</option>
+                <option value="Uranus">Uranus</option>
+                <option value="Neptune">Neptune</option>
+                <option value="Sun">Sun</option>
+                <option value="Pluto">Pluto</option>
+            </select>
+        </div>
+
+        <div class="control">
+            <button id="render-planet-btn">Render Planet</button>
+        </div>
+    </div>
+
+    <script>
+        // Create a scene
+        const scene = new THREE.Scene();
+
+        // Create a camera
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.z = 10;
+
+        // Create a renderer
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a sphere for the starry background
+        const bgGeometry = new THREE.SphereGeometry(1000, 50, 50);
+        const bgMaterial = new THREE.MeshBasicMaterial({
+            side: THREE.BackSide,
+            map: new THREE.TextureLoader().load('/images/starry_bg.jpg')
+        });
+        const bgSphere = new THREE.Mesh(bgGeometry, bgMaterial);
+        scene.add(bgSphere);
+
+        const planetProperties = {
+            // Planet properties here
+            Mercury: {
+                name: 'Mercury',
+                texture: '/images/mercury_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 2
+            },
+            Venus: {
+                name: 'Venus',
+                texture: '/images/venus_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 2
+            },
+            Earth: {
+                name: 'Earth',
+                texture: '/images/earth_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 2.5
+            },
+            Mars: {
+                name: 'Mars',
+                texture: '/images/mars_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 2
+            },
+            Jupiter: {
+                name: 'Jupiter',
+                texture: '/images/jupiter_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 4
+            },
+            Saturn: {
+                name: 'Saturn',
+                texture: '/images/saturn_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 3
+            },
+            Uranus: {
+                name: 'Uranus',
+                texture: '/images/uranus_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 3
+            },
+            Neptune: {
+                name: 'Neptune',
+                texture: '/images/neptune_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 3
+            },
+
+            Pluto: {
+                name: 'Pluto',
+                texture: '/images/pluto_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 1.5
+            },
+            Sun: {
+                name: 'Sun',
+                texture: '/images/sun_map.jpg',
+                position: new THREE.Vector3(0, 0, 0),
+                size: 5
+            }
+        };
+
+        // Create a variable to hold the currently rendered planet
+        let currentPlanet;
+
+        // Create a function to render the selected planet
+        function renderPlanet(planetName) {
+            // Remove the previously rendered planet from the scene if exists
+            if (currentPlanet) {
+                scene.remove(currentPlanet.mesh);
+            }
+
+            // Find the planet object based on its name
+            const planet = planetProperties[planetName];
+
+            if (planet) {
+                // Create the mesh for the selected planet
+                const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
+                const planetTexture = new THREE.TextureLoader().load(planet.texture);
+                const planetMaterial = new THREE.MeshBasicMaterial({
+                    map: planetTexture,
+                    transparent: true,
+                    opacity: 1
+                });
+                const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+                planetMesh.position.copy(planet.position);
+                scene.add(planetMesh);
+
+                // Set the current planet
+                currentPlanet = { name: planet.name, mesh: planetMesh };
+            }
+        }
+
+        // Event listener for planet selection
+        renderPlanet('Earth');
+        const planetSelect = document.getElementById('planet-select');
+        const renderButton = document.getElementById('render-planet-btn');
+        renderButton.addEventListener('click', () => {
+            const selectedPlanet = planetSelect.value;
+            renderPlanet(selectedPlanet);
+        });
+
+        // Variables for mouse interaction
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotationSpeed = 0.01;
+
+        // Mouse events for camera movement
+        renderer.domElement.addEventListener('mousedown', onMouseDown);
+        renderer.domElement.addEventListener('mousemove', onMouseMove);
+        renderer.domElement.addEventListener('mouseup', onMouseUp);
+
+        function onMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onMouseMove(event) {
+            if (isDragging) {
+                const deltaX = event.clientX - previousMousePosition.x;
+                const deltaY = event.clientY - previousMousePosition.y;
+
+                // Calculate the rotation angles based on mouse movement
+                const rotationSpeed = 0.01;
+                const theta = deltaX * rotationSpeed;
+                const phi = deltaY * rotationSpeed;
+
+                // Calculate the new camera position in spherical coordinates
+                const spherical = new THREE.Spherical().setFromVector3(camera.position.clone().sub(currentPlanet.mesh.position));
+                spherical.theta -= theta;
+                spherical.phi -= phi;
+                spherical.makeSafe();
+
+                // Convert spherical coordinates back to Cartesian coordinates
+                const position = new THREE.Vector3().setFromSpherical(spherical);
+                camera.position.copy(currentPlanet.mesh.position).add(position);
+                camera.lookAt(currentPlanet.mesh.position);
+
+                previousMousePosition = {
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            }
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+        }
+
+        // Resize handling
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener('resize', onWindowResize, false);
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            currentPlanet.mesh.rotation.y += 0.002;
+            bgSphere.rotation.y += 0.002;
+
+            // Render the scene with the camera
+            renderer.render(scene, camera);
+        }
+
+        // Start the animation loop
+        animate();
+    </script>
+</body>
+
+</html>
