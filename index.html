@@ -221,14 +221,12 @@
         };
 
         // Create a variable to hold the currently rendered planet
-        // Create a variable to hold the currently rendered planet
         let currentPlanet = null;
         let ringMesh = null;
 
         // Create a function to render the selected planet
         function renderPlanet(planetName) {
             // Remove the previously rendered planet from the scene if it exists
-
             if (currentPlanet) {
                 scene.remove(currentPlanet.mesh);
                 if (ringMesh) {
@@ -239,6 +237,8 @@
             // Find the planet object based on its name
             const planet = planetProperties[planetName];
 
+
+
             if (planet) {
                 // Create the mesh for the selected planet
                 const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
@@ -246,18 +246,11 @@
                 const planetMaterial = new THREE.MeshBasicMaterial({
                     map: planetTexture,
                     transparent: true,
-                    opacity: 1,
+                    opacity: 1
                 });
                 const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
                 planetMesh.position.copy(planet.position);
-                if (planet.ring) { }
                 scene.add(planetMesh);
-
-                if (planet.size > 3) {
-                    camera.position.z = planet.size + 10;
-                } else {
-                    camera.position.z = 10;
-                }
 
                 // Set the current planet
                 currentPlanet = { name: planet.name, mesh: planetMesh };
@@ -284,11 +277,8 @@
 
                 document.getElementById("name").innerHTML = planet.name;
                 document.getElementById("description").innerHTML = planet.description;
-
             }
         }
-
-
 
         // Event listener for planet selection
         renderPlanet('Earth');
@@ -458,7 +448,6 @@
             requestAnimationFrame(animate);
 
             if (isDragging == false && isTouchDragging == false) {
-
                 currentPlanet.mesh.rotation.y += 0.002;
                 bgSphere.rotation.y += 0.002;
             }
