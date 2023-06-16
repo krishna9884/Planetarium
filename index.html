@@ -60,7 +60,10 @@
                 /* align-items: flex-start;
                 justify-content: flex-start; */
                 /* padding: 20px; */
+                padding: 0;
             }
+
+
 
             #planet-info {
                 /* font-size: 24px; */
@@ -129,7 +132,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Create a sphere for the starry background
-        const bgGeometry = new THREE.SphereGeometry(1000, 25, 25);
+        const bgGeometry = new THREE.SphereGeometry(1000, 32, 32);
         const bgMaterial = new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
             map: new THREE.TextureLoader().load('images/starry_bg.jpg')
