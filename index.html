@@ -2,29 +2,31 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             margin: 0;
             overflow: hidden;
             display: flex;
-            justify-content: flex-end;
-            align-items: flex-start;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            font-family: Arial, sans-serif;
         }
 
         #planet-info {
             position: absolute;
-            left: 20px;
-            top: 20px;
+            top: 0px;
+            left: 0px;
+            margin-left: 20px;
+            margin-right: 20px;
             color: white;
-            font-family: Arial, sans-serif;
             font-size: 18px;
-            pointer-events: none;
         }
 
         .controls-container {
             position: absolute;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             display: flex;
             flex-direction: column;
@@ -39,11 +41,40 @@
         button {
             padding: 10px;
             font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #fff;
-            color: #333;
+            /* border: solid white 2px; */
+            border-radius: 20px;
+            background-color: transparent;
+            color: #ffffff;
             cursor: pointer;
+        }
+
+        button {
+            background-color: rgba(107, 107, 107, 0.9);
+            color: rgb(255, 250, 250);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                /* align-items: flex-start;
+                justify-content: flex-start; */
+                /* padding: 20px; */
+            }
+
+            #planet-info {
+                font-size: 24px;
+            }
+
+            .controls-container {
+                position: absolute;
+                bottom: 2px;
+                display: flex;
+            }
+
+            select,
+            button {
+                font-size: 24px;
+                padding: 16px;
+            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -51,13 +82,12 @@
 
 <body>
     <div id="planet-info">
-        <h1>Planet Information</h1>
-        <p>Here you can add any information or details about the selected planet.</p>
+        <h1 id="name">Planet Information</h1>
+        <p id="description">Here you can add any information or details about the selected planet.</p>
     </div>
 
     <div class="controls-container">
         <div class="control">
-            <label for="planet-select">Select Planet:</label>
             <select id="planet-select" default="Earth">
                 <option value="Mercury">Mercury</option>
                 <option value="Venus">Venus</option>
@@ -107,60 +137,77 @@
         const planetProperties = {
             Mercury: {
                 name: 'Mercury',
+                description: 'Mercury is the closest planet to the Sun and the smallest planet in the Solar System.',
                 texture: 'images/mercury_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2
             },
             Venus: {
                 name: 'Venus',
+                description: 'Venus is the second planet from the Sun and is often called Earth\'s twin because of its similar size, mass, and composition.',
                 texture: 'images/venus_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2
             },
             Earth: {
                 name: 'Earth',
+                description: 'Earth is the third planet from the Sun and is the only known celestial body to support life.',
                 texture: 'images/earth_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2.5
             },
             Mars: {
                 name: 'Mars',
+                description: 'Mars is the fourth planet from the Sun and is known as the "Red Planet" due to its reddish appearance.',
                 texture: 'images/mars_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 2
             },
             Jupiter: {
                 name: 'Jupiter',
+                description: 'Jupiter is the largest planet in the Solar System and is known for its colorful bands and iconic Great Red Spot.',
                 texture: 'images/jupiter_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 4
             },
             Saturn: {
                 name: 'Saturn',
+                description: 'Saturn is the sixth planet from the Sun and is famous for its stunning ring system composed of ice particles and dust.',
                 texture: 'images/saturn_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
-                size: 3
+                size: 3,
+                ring: {
+                    innerRadius: 3,
+                    outerRadius: 5,
+                    thetaSegments: 64,
+                    color: 0x7B694D,
+                    tilt: 2,
+                }
             },
             Uranus: {
                 name: 'Uranus',
+                description: 'Uranus is the seventh planet from the Sun and is characterized by its unique feature of rotating on its side.',
                 texture: 'images/uranus_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 3
             },
             Neptune: {
                 name: 'Neptune',
+                description: 'Neptune is the eighth and farthest planet from the Sun. It is known for its striking blue coloration.',
                 texture: 'images/neptune_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 3
             },
             Pluto: {
                 name: 'Pluto',
+                description: 'Pluto is a dwarf planet located in the Kuiper Belt. It was considered the ninth planet until its reclassification in 2006.',
                 texture: 'images/pluto_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 1.5
             },
             Sun: {
                 name: 'Sun',
+                description: 'The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma.',
                 texture: 'images/sun_map.jpg',
                 position: new THREE.Vector3(0, 0, 0),
                 size: 5
@@ -168,13 +215,19 @@
         };
 
         // Create a variable to hold the currently rendered planet
+        // Create a variable to hold the currently rendered planet
         let currentPlanet = null;
+        let ringMesh = null;
 
         // Create a function to render the selected planet
         function renderPlanet(planetName) {
             // Remove the previously rendered planet from the scene if it exists
+
             if (currentPlanet) {
                 scene.remove(currentPlanet.mesh);
+                if (ringMesh) {
+                    scene.remove(ringMesh);
+                }
             }
 
             // Find the planet object based on its name
@@ -187,16 +240,49 @@
                 const planetMaterial = new THREE.MeshBasicMaterial({
                     map: planetTexture,
                     transparent: true,
-                    opacity: 1
+                    opacity: 1,
                 });
                 const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
                 planetMesh.position.copy(planet.position);
+                if (planet.ring) { }
                 scene.add(planetMesh);
+
+                if (planet.size > 3) {
+                    camera.position.z = planet.size + 10;
+                } else {
+                    camera.position.z = 10;
+                }
 
                 // Set the current planet
                 currentPlanet = { name: planet.name, mesh: planetMesh };
+
+                if (planet.ring) {
+                    const ringGeometry = new THREE.RingGeometry(
+                        planet.size + planet.ring.innerRadius,
+                        planet.size + planet.ring.outerRadius,
+                        planet.ring.thetaSegments
+                    );
+                    const ringMaterial = new THREE.MeshBasicMaterial({
+                        color: planet.ring.color,
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: planet.ring.opacity,
+                    });
+
+                    ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+                    ringMesh.position.copy(planet.position);
+                    ringMesh.rotation.x = Math.PI / 2;
+                    ringMesh.rotation.x = planet.ring.tilt; // Tilt the ring mesh itself
+                    scene.add(ringMesh);
+                }
+
+                document.getElementById("name").innerHTML = planet.name;
+                document.getElementById("description").innerHTML = planet.description;
+
             }
         }
+
+
 
         // Event listener for planet selection
         renderPlanet('Earth');
@@ -365,8 +451,11 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            currentPlanet.mesh.rotation.y += 0.002;
-            bgSphere.rotation.y += 0.002;
+            if (isDragging == false && isTouchDragging == false) {
+
+                currentPlanet.mesh.rotation.y += 0.002;
+                bgSphere.rotation.y += 0.002;
+            }
 
             camera.lookAt(currentPlanet.mesh.position);
 
