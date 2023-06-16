@@ -129,7 +129,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Create a sphere for the starry background
-        const bgGeometry = new THREE.SphereGeometry(1000, 0, 0);
+        const bgGeometry = new THREE.SphereGeometry(1000, 25, 25);
         const bgMaterial = new THREE.MeshBasicMaterial({
             side: THREE.BackSide,
             map: new THREE.TextureLoader().load('images/starry_bg.jpg')
