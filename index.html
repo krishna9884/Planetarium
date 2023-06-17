@@ -81,9 +81,8 @@
                 position: absolute;
                 bottom: 2px;
                 display: flex;
-                top: 20px;
+                /* top: 20px; */
                 margin-bottom: 20px;
-                justify-content: space-between;
             }
 
             select,
@@ -379,9 +378,15 @@
             }
         }
 
+        function handleTouchEnd(event) {
+            isTouchDragging = false;
+        }
+
         // Add touch event listeners to the renderer element
         renderer.domElement.addEventListener('touchstart', handleTouchStart, false);
         renderer.domElement.addEventListener('touchmove', handleTouchMove, false);
+        renderer.domElement.addEventListener('touchend', handleTouchEnd, false);
+
 
         // Variables for mouse interaction
         let isDragging = false;
